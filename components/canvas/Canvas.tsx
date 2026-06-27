@@ -22,6 +22,16 @@ import { Sidebar } from "./Sidebar";
 import { Toolbar } from "./Toolbar";
 import { NodeEditor } from "./NodeEditor";
 import { OutputPanel, type NodeResult } from "./OutputPanel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import type { RunNodeRequest, RunNodeResponse } from "@/app/api/run/route";
 
 const NODE_TYPES = { agentNode: AgentNode };
@@ -32,25 +42,25 @@ const DEFAULT_NODES: Node[] = [
     id: "1",
     type: "agentNode",
     position: { x: 80, y: 180 },
-    data: { label: "User Input", model: "google/gemini-2.0-flash", type: "trigger", status: "idle", description: "Receives the user's design brief" } satisfies AgentNodeData,
+    data: { label: "User Input", model: "google/gemini-2.5-flash", type: "trigger", status: "idle", description: "Receives the user's design brief" } satisfies AgentNodeData,
   },
   {
     id: "2",
     type: "agentNode",
     position: { x: 340, y: 120 },
-    data: { label: "Research Agent", model: "google/gemini-2.0-flash", type: "agent", status: "idle", description: "Gathers context and inspiration for the design brief" } satisfies AgentNodeData,
+    data: { label: "Research Agent", model: "google/gemini-2.5-flash", type: "agent", status: "idle", description: "Gathers context and inspiration for the design brief" } satisfies AgentNodeData,
   },
   {
     id: "3",
     type: "agentNode",
     position: { x: 340, y: 260 },
-    data: { label: "Copy Agent", model: "google/gemini-2.0-flash", type: "subagent", status: "idle", description: "Writes UI copy and microcopy based on the design brief" } satisfies AgentNodeData,
+    data: { label: "Copy Agent", model: "google/gemini-2.5-flash", type: "subagent", status: "idle", description: "Writes UI copy and microcopy based on the design brief" } satisfies AgentNodeData,
   },
   {
     id: "4",
     type: "agentNode",
     position: { x: 600, y: 180 },
-    data: { label: "Output", model: "google/gemini-2.0-flash", type: "output", status: "idle", description: "Compiles the research and copy into a final design brief summary" } satisfies AgentNodeData,
+    data: { label: "Output", model: "google/gemini-2.5-flash", type: "output", status: "idle", description: "Compiles the research and copy into a final design brief summary" } satisfies AgentNodeData,
   },
 ];
 
@@ -108,6 +118,8 @@ export function Canvas() {
   const [results, setResults] = useState<NodeResult[]>([]);
   const [showOutput, setShowOutput] = useState(false);
   const [running, setRunning] = useState(false);
+  const [showRunDialog, setShowRunDialog] = useState(false);
+  const [userPrompt, setUserPrompt] = useState("");
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [rfInstance, setRfInstance] = useState<any>(null);
 
@@ -138,7 +150,7 @@ export function Canvas() {
       id: nextId(),
       type: "agentNode",
       position,
-      data: { label: type.charAt(0).toUpperCase() + type.slice(1), model: "google/gemini-2.0-flash", type, status: "idle", description: "" } satisfies AgentNodeData,
+      data: { label: type.charAt(0).toUpperCase() + type.slice(1), model: "google/gemini-2.5-flash", type, status: "idle", description: "" } satisfies AgentNodeData,
     }]);
   }, [rfInstance, setNodes]);
 
@@ -153,8 +165,9 @@ export function Canvas() {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n));
   }, [setNodes]);
 
-  async function handleRun() {
+  async function handleRun(userInput: string) {
     if (running) return;
+    setShowRunDialog(false);
     setRunning(true);
     setSelectedNodeId(null);
     setShowOutput(true);
@@ -187,7 +200,7 @@ export function Canvas() {
         .filter(Boolean)
         .join("\n\n---\n\n");
 
-      const inputText = upstreamOutputs || "Begin the pipeline. Generate an example design brief for a mobile app.";
+      const inputText = upstreamOutputs || userInput || "Begin.";
 
       try {
         const res = await fetch("/api/run", {
@@ -238,7 +251,7 @@ export function Canvas() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <Toolbar onClear={handleClear} onRun={handleRun} onReset={handleReset} nodeCount={nodes.length} running={running} />
+      <Toolbar onClear={handleClear} onRun={() => setShowRunDialog(true)} onReset={handleReset} nodeCount={nodes.length} running={running} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
 
@@ -282,6 +295,50 @@ export function Canvas() {
           <OutputPanel results={results} onClose={() => setShowOutput(false)} />
         )}
       </div>
+
+      <Dialog open={showRunDialog} onOpenChange={setShowRunDialog}>
+        <DialogContent showCloseButton={false} className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>What's your design brief?</DialogTitle>
+            <DialogDescription>
+              This becomes the starting input for your pipeline's trigger node.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-1.5">
+            <Label className="text-xs">Your prompt</Label>
+            <Textarea
+              autoFocus
+              value={userPrompt}
+              onChange={(e) => setUserPrompt(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                  handleRun(userPrompt);
+                }
+              }}
+              placeholder="e.g. Design a mobile app for tracking water intake for busy professionals."
+              className="resize-none min-h-[120px] text-sm"
+            />
+            <p className="text-[11px] text-muted-foreground">⌘ Enter to run</p>
+          </div>
+
+          <DialogFooter>
+            <button
+              onClick={() => setShowRunDialog(false)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleRun(userPrompt)}
+              disabled={!userPrompt.trim()}
+              className="text-sm font-medium bg-primary text-primary-foreground rounded-md px-3 py-1.5 disabled:opacity-40 hover:opacity-90 transition-opacity"
+            >
+              Run Pipeline
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

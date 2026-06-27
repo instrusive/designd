@@ -11,8 +11,8 @@ import type { AgentNodeData } from "./AgentNode";
 
 const MODELS: { value: string; label: string; free: boolean }[] = [
   // Free models
+  { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash", free: true },
   { value: "google/gemini-2.0-flash", label: "Gemini 2.0 Flash", free: true },
-  { value: "google/gemini-1.5-flash", label: "Gemini 1.5 Flash", free: true },
   { value: "groq/llama-3.3-70b-versatile", label: "Llama 3.3 70B (Groq)", free: true },
   { value: "groq/llama-3.1-8b-instant", label: "Llama 3.1 8B Instant (Groq)", free: true },
   { value: "groq/mixtral-8x7b-32768", label: "Mixtral 8x7B (Groq)", free: true },

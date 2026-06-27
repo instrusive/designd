@@ -18,9 +18,7 @@ export type RunNodeResponse = {
 
 function resolveModel(modelValue: string) {
   const name = modelValue.includes("/") ? modelValue.split("/")[1] : modelValue;
-  // Fall back to gemini-1.5-flash if 2.0-flash is specified — better free tier limits
-  const resolved = name === "gemini-2.0-flash" ? "gemini-1.5-flash" : name;
-  return google(resolved);
+  return google(name);
 }
 
 export async function POST(req: Request) {
