@@ -17,6 +17,17 @@ export function Toolbar({ onClear, onRun, onReset, nodeCount, running }: Props) 
   return (
     <header className="flex h-12 items-center gap-3 border-b border-border bg-card px-4 shrink-0">
       <span className="text-sm font-semibold tracking-tight">designd</span>
+      <span className="text-xs text-muted-foreground">
+        by{" "}
+        <a
+          href="https://www.madebylianna.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-foreground transition-colors"
+        >
+          Lianna Lamorena
+        </a>
+      </span>
       <span className="text-xs text-muted-foreground font-mono">
         {nodeCount} node{nodeCount !== 1 ? "s" : ""}
       </span>

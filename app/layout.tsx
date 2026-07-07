@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "designd",
-  description: "AI orchestration",
+  description: "AI agent orchestration for designers. © Lianna Lamorena",
 };
 
 export default function RootLayout({
