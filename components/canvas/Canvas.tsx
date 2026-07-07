@@ -36,6 +36,21 @@ import type { RunNodeRequest, RunNodeResponse } from "@/app/api/run/route";
 
 const NODE_TYPES = { agentNode: AgentNode };
 const STORAGE_KEY = "designd-canvas";
+const STORAGE_VERSION = 3;
+
+const VALID_MODELS = new Set([
+  "meta-llama/llama-3.3-70b-instruct:free",
+  "google/gemini-2.5-flash-preview:free",
+  "deepseek/deepseek-r1:free",
+  "mistralai/mistral-7b-instruct:free",
+  "qwen/qwen3-235b-a22b:free",
+  "anthropic/claude-sonnet-4-5",
+  "anthropic/claude-haiku-4-5",
+  "openai/gpt-4o",
+  "openai/gpt-4o-mini",
+  "google/gemini-2.5-pro",
+]);
+const DEFAULT_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
 
 const DEFAULT_NODES: Node[] = [
   {
@@ -150,12 +165,25 @@ function loadFromStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as { nodes: Node[]; edges: Edge[] };
+    const parsed = JSON.parse(raw) as { version?: number; nodes: Node[]; edges: Edge[] };
+    if ((parsed.version ?? 0) < STORAGE_VERSION) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    // Replace any invalid model IDs with the current default
+    const nodes = parsed.nodes.map((n) => {
+      const data = n.data as AgentNodeData;
+      if (!VALID_MODELS.has(data.model)) {
+        return { ...n, data: { ...data, model: DEFAULT_MODEL } };
+      }
+      return n;
+    });
+    return { nodes, edges: parsed.edges };
   } catch { return null; }
 }
 
 function saveToStorage(nodes: Node[], edges: Edge[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ nodes, edges }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: STORAGE_VERSION, nodes, edges }));
 }
 
 // Topological sort — returns node ids in execution order
