@@ -20,7 +20,7 @@ export type RunNodeResponse = {
 
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: process.env.OPENROUTER_API_KEY ?? "",
 });
 
 function parseDataUrl(dataUrl: string): { base64: string; mimeType: string } | null {
@@ -66,6 +66,14 @@ type ImagePart = { type: "image"; image: string; mimeType: string };
 type TextPart  = { type: "text";  text: string };
 
 export async function POST(req: Request) {
+  if (!process.env.OPENROUTER_API_KEY) {
+    const body = (await req.json()) as RunNodeRequest;
+    return NextResponse.json(
+      { nodeId: body.nodeId, output: "", error: "OPENROUTER_API_KEY is not set. Add it to your .env.local file (local) or Vercel Environment Variables (deployed)." } satisfies RunNodeResponse,
+      { status: 500 }
+    );
+  }
+
   const body = (await req.json()) as RunNodeRequest;
 
   const systemPrompt = body.description?.trim()
