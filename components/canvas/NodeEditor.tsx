@@ -11,16 +11,18 @@ import { Badge } from "@/components/ui/badge";
 import type { AgentNodeData, Material } from "./AgentNode";
 
 const MODELS: { value: string; label: string; free: boolean }[] = [
-  { value: "google/gemini-2.5-flash",        label: "Gemini 2.5 Flash",       free: true },
-  { value: "google/gemini-2.0-flash",        label: "Gemini 2.0 Flash",       free: true },
-  { value: "groq/llama-3.3-70b-versatile",   label: "Llama 3.3 70B (Groq)",  free: true },
-  { value: "groq/llama-3.1-8b-instant",      label: "Llama 3.1 8B Instant",  free: true },
-  { value: "groq/mixtral-8x7b-32768",        label: "Mixtral 8x7B (Groq)",   free: true },
-  { value: "anthropic/claude-sonnet-4-6",    label: "Claude Sonnet 4.6",      free: false },
-  { value: "anthropic/claude-opus-4-8",      label: "Claude Opus 4.8",        free: false },
-  { value: "anthropic/claude-haiku-4-5",     label: "Claude Haiku 4.5",       free: false },
-  { value: "openai/gpt-4o",                  label: "GPT-4o",                 free: false },
-  { value: "openai/gpt-4o-mini",             label: "GPT-4o Mini",            free: false },
+  // Free models (via OpenRouter :free tier)
+  { value: "meta-llama/llama-3.3-70b-instruct:free", label: "Llama 3.3 70B",          free: true },
+  { value: "google/gemini-2.5-flash-preview:free",   label: "Gemini 2.5 Flash",        free: true },
+  { value: "deepseek/deepseek-r1:free",              label: "DeepSeek R1",             free: true },
+  { value: "mistralai/mistral-7b-instruct:free",     label: "Mistral 7B",              free: true },
+  { value: "qwen/qwen3-235b-a22b:free",              label: "Qwen3 235B",              free: true },
+  // Paid models
+  { value: "anthropic/claude-sonnet-4-5",            label: "Claude Sonnet 4.5",       free: false },
+  { value: "anthropic/claude-haiku-4-5",             label: "Claude Haiku 4.5",        free: false },
+  { value: "openai/gpt-4o",                          label: "GPT-4o",                  free: false },
+  { value: "openai/gpt-4o-mini",                     label: "GPT-4o Mini",             free: false },
+  { value: "google/gemini-2.5-pro",                  label: "Gemini 2.5 Pro",          free: false },
 ];
 
 type MaterialType = Material["type"];

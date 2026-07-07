@@ -44,7 +44,7 @@ const DEFAULT_NODES: Node[] = [
     position: { x: 50, y: 200 },
     data: {
       label: "Design Brief",
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       type: "trigger",
       status: "idle",
       description: "You are receiving a design brief. Restate the brief clearly, identify the core problem being solved, the target audience, and any constraints or goals mentioned. Be concise and structured.",
@@ -56,7 +56,7 @@ const DEFAULT_NODES: Node[] = [
     position: { x: 340, y: 200 },
     data: {
       label: "Discover",
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       type: "agent",
       status: "idle",
       description: "You are a UX researcher in the Discover phase — your job is to learn about the user. Based on the design brief, produce: (1) a profile of the target user and their context, (2) key insights a researcher would uncover through interviews and observations, (3) a competitor landscape summary — what exists, what's missing, what works, (4) a short customer journey narrative showing where the user struggles today. Be specific and grounded, as if you have done the fieldwork.",
@@ -68,7 +68,7 @@ const DEFAULT_NODES: Node[] = [
     position: { x: 630, y: 200 },
     data: {
       label: "Define",
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       type: "agent",
       status: "idle",
       description: "You are a UX strategist in the Define phase — your job is to determine features and frame the problem. Based on the research findings, produce: (1) 1–2 user personas with goals and frustrations, (2) a problem statement in How Might We format, (3) 3–5 user stories (As a... I want... So that...), (4) the top jobs-to-be-done, (5) a high-level information architecture outline, (6) a prioritized feature list. Be decisive — write as a designer who has turned research into clear direction.",
@@ -80,7 +80,7 @@ const DEFAULT_NODES: Node[] = [
     position: { x: 920, y: 200 },
     data: {
       label: "Design",
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       type: "agent",
       status: "idle",
       description: "You are a UX designer in the Design phase — your job is to brainstorm solutions and simulate the user experience. Based on the defined problem and features, produce: (1) a recommended design direction with rationale, (2) key user flows described step by step for the 2–3 most critical paths, (3) wireframe descriptions for the most important screens, (4) interaction patterns and component recommendations, (5) a design system starting point — typography mood, color direction, spacing principles. Write as a designer presenting concepts to a team.",
@@ -92,7 +92,7 @@ const DEFAULT_NODES: Node[] = [
     position: { x: 1210, y: 200 },
     data: {
       label: "Test",
-      model: "google/gemini-2.0-flash-exp:free",
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       type: "output",
       status: "idle",
       description: "You are a UX validation strategist in the Test phase — your job is to plan how to validate this design with real users. Produce an 8-step test plan: (1) what to measure — whole product, feature, version, or release, (2) which framework to use — recommend HEART (for consumer-facing products) or CASTLE (for enterprise/internal products) or standalone methods, with justification based on scope, (3) baseline measurements to collect first, (4) what to redesign based on expected findings, (5) additional measurement rounds needed, (6) how to interpret findings, (7) how to connect findings to business metrics and ROI/KPIs, (8) a brief template for presenting findings to partners, stakeholders, and leadership.",
@@ -224,7 +224,7 @@ export function Canvas() {
       id: nextId(),
       type: "agentNode",
       position,
-      data: { label, model: "google/gemini-2.0-flash-exp:free", type, status: "idle", description: DEFAULT_PROMPTS[type as AgentNodeData["type"]] ?? "" } satisfies AgentNodeData,
+      data: { label, model: "meta-llama/llama-3.3-70b-instruct:free", type, status: "idle", description: DEFAULT_PROMPTS[type as AgentNodeData["type"]] ?? "" } satisfies AgentNodeData,
     }]);
   }, [rfInstance, setNodes]);
 
