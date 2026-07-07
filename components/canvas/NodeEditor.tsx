@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { X, Plus, Link, FileText, Trash2, Image, Figma } from "lucide-react";
+import { X, Plus, Link, FileText, Trash2, Image, PenTool } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +29,7 @@ const TYPE_META: Record<MaterialType, { icon: React.ElementType; label: string }
   link:  { icon: Link,     label: "Link"  },
   text:  { icon: FileText, label: "Text"  },
   image: { icon: Image,    label: "Image" },
-  figma: { icon: Figma,    label: "Figma" },
+  figma: { icon: PenTool,  label: "Figma" },
 };
 
 async function compressImage(file: File): Promise<string> {
