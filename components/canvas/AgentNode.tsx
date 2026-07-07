@@ -1,6 +1,6 @@
 "use client";
 
-import { Handle, Position, NodeResizer, type NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Bot, Cpu, Zap, Users, MessageSquare, Eye, ClipboardList, BarChart2, FlaskConical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -100,18 +100,11 @@ export function AgentNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "relative w-full h-full rounded-xl border-2 px-4 py-3 shadow-lg transition-all overflow-hidden",
+        "w-[160px] rounded-xl border-2 px-3 py-2.5 shadow-lg transition-all",
         config.color,
         selected && "ring-2 ring-white/20 ring-offset-1 ring-offset-transparent"
       )}
     >
-      <NodeResizer
-        minWidth={200}
-        minHeight={90}
-        lineStyle={{ borderColor: "transparent" }}
-        handleStyle={{ width: 8, height: 8, borderRadius: 2 }}
-      />
-
       {nodeData.type !== "trigger" && (
         <Handle
           type="target"
@@ -120,27 +113,25 @@ export function AgentNode({ data, selected }: NodeProps) {
         />
       )}
 
-      <div className="flex items-start gap-2 h-full">
+      <div className="flex items-start gap-2">
         <div className={cn("mt-0.5 rounded-lg p-1.5 border shrink-0", config.badge)}>
           <Icon className="h-3.5 w-3.5" />
         </div>
-        <div className="flex-1 min-w-0 overflow-hidden">
-          <div className="flex items-start gap-1.5 mb-0.5">
-            <span className="text-sm font-medium text-foreground break-words leading-snug flex-1">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start gap-1 mb-0.5">
+            <span className="text-sm font-medium text-foreground leading-snug break-words flex-1">
               {nodeData.label}
             </span>
-            <span
-              className={cn("h-1.5 w-1.5 rounded-full shrink-0 mt-1.5", STATUS_DOT[status])}
-            />
+            <span className={cn("h-1.5 w-1.5 rounded-full shrink-0 mt-1.5", STATUS_DOT[status])} />
           </div>
           <Badge
             variant="outline"
-            className={cn("text-[10px] px-1.5 py-0 h-4 font-mono border max-w-full truncate block", config.badge)}
+            className={cn("text-[10px] px-1.5 py-0 h-4 font-mono border w-full truncate block", config.badge)}
           >
             {nodeData.model.includes("/") ? nodeData.model.split("/")[1] : nodeData.model}
           </Badge>
           {nodeData.description && (
-            <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed break-words">
+            <p className="mt-1.5 text-[11px] text-muted-foreground leading-tight line-clamp-2">
               {nodeData.description}
             </p>
           )}
