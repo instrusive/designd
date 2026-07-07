@@ -360,7 +360,7 @@ export function Canvas() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      <Toolbar onClear={handleClear} onRun={() => setShowRunDialog(true)} onReset={handleReset} nodeCount={nodes.length} running={running} />
+      <Toolbar onClear={handleClear} onRun={() => setShowRunDialog(true)} onReset={handleReset} onShowOutput={() => setShowOutput(true)} nodeCount={nodes.length} running={running} hasResults={results.length > 0} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
 
