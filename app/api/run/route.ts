@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
 
@@ -16,9 +16,13 @@ export type RunNodeResponse = {
   error?: string;
 };
 
+const openrouter = createOpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
+
 function resolveModel(modelValue: string) {
-  const name = modelValue.includes("/") ? modelValue.split("/")[1] : modelValue;
-  return google(name);
+  return openrouter(modelValue);
 }
 
 export async function POST(req: Request) {

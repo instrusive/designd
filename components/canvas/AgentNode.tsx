@@ -1,14 +1,14 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Bot, Cpu, Zap } from "lucide-react";
+import { Bot, Cpu, Zap, Users, MessageSquare, Eye, ClipboardList, BarChart2, FlaskConical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 export type AgentNodeData = {
   label: string;
   model: string;
-  type: "agent" | "subagent" | "trigger" | "output";
+  type: "agent" | "subagent" | "trigger" | "output" | "user-interview" | "focus-group" | "observation" | "survey" | "data-analysis" | "ab-test";
   status?: "idle" | "running" | "done" | "error";
   description?: string;
 };
@@ -37,6 +37,42 @@ const TYPE_CONFIG = {
     color: "border-emerald-500/50 bg-emerald-500/5",
     badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     label: "Output",
+  },
+  "user-interview": {
+    icon: Users,
+    color: "border-rose-500/50 bg-rose-500/5",
+    badge: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+    label: "User Interview",
+  },
+  "focus-group": {
+    icon: MessageSquare,
+    color: "border-pink-500/50 bg-pink-500/5",
+    badge: "bg-pink-500/10 text-pink-400 border-pink-500/20",
+    label: "Focus Group",
+  },
+  "observation": {
+    icon: Eye,
+    color: "border-orange-500/50 bg-orange-500/5",
+    badge: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    label: "Observation",
+  },
+  "survey": {
+    icon: ClipboardList,
+    color: "border-cyan-500/50 bg-cyan-500/5",
+    badge: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20",
+    label: "Survey",
+  },
+  "data-analysis": {
+    icon: BarChart2,
+    color: "border-teal-500/50 bg-teal-500/5",
+    badge: "bg-teal-500/10 text-teal-400 border-teal-500/20",
+    label: "Data Analysis",
+  },
+  "ab-test": {
+    icon: FlaskConical,
+    color: "border-sky-500/50 bg-sky-500/5",
+    badge: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+    label: "A/B Test",
   },
 };
 
