@@ -127,4 +127,8 @@
   html {
     @apply font-sans;
   }
+  /* Make native <select> respect dark mode OS chrome */
+  .dark select {
+    color-scheme: dark;
+  }
 }

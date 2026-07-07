@@ -211,6 +211,12 @@ export function Canvas() {
     setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n));
   }, [setNodes]);
 
+  const onNodeDelete = useCallback((id: string) => {
+    setNodes((nds) => nds.filter((n) => n.id !== id));
+    setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
+    setSelectedNodeId(null);
+  }, [setNodes, setEdges]);
+
   async function handleRun(userInput: string) {
     if (running) return;
     setShowRunDialog(false);
@@ -315,12 +321,13 @@ export function Canvas() {
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             nodeTypes={NODE_TYPES}
+            deleteKeyCode={["Backspace", "Delete"]}
             fitView
-            defaultEdgeOptions={{ style: { stroke: "#52525b", strokeWidth: 1.5 } }}
+            defaultEdgeOptions={{ style: { stroke: "#71717a", strokeWidth: 1.5 } }}
           >
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="var(--color-border)" />
-            <Controls className="[&>button]:bg-card [&>button]:border-border [&>button]:text-foreground" />
-            <MiniMap className="!bg-card !border-border" nodeColor="#3f3f46" maskColor="rgba(0,0,0,0.4)" />
+            <Controls className="[&>button]:bg-card [&>button]:border-border [&>button]:text-foreground [&>button]:hover:bg-muted" />
+            <MiniMap className="!bg-card !border-border" nodeColor="#71717a" maskColor="rgba(128,128,128,0.15)" />
             <Panel position="bottom-center">
               <p className="text-[11px] text-muted-foreground bg-card border border-border rounded-full px-3 py-1">
                 Drag from sidebar · Connect handles · Click node to edit
@@ -334,6 +341,7 @@ export function Canvas() {
             nodeId={selectedNode.id}
             data={selectedNode.data as AgentNodeData}
             onChange={onNodeDataChange}
+            onDelete={onNodeDelete}
             onClose={() => setSelectedNodeId(null)}
           />
         )}

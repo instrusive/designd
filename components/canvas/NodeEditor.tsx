@@ -56,10 +56,11 @@ type Props = {
   nodeId: string;
   data: AgentNodeData;
   onChange: (id: string, data: Partial<AgentNodeData>) => void;
+  onDelete: (id: string) => void;
   onClose: () => void;
 };
 
-export function NodeEditor({ nodeId, data, onChange, onClose }: Props) {
+export function NodeEditor({ nodeId, data, onChange, onDelete, onClose }: Props) {
   const [adding, setAdding] = useState(false);
   const [newType, setNewType] = useState<MaterialType>("link");
   const [newLabel, setNewLabel] = useState("");
@@ -334,7 +335,14 @@ export function NodeEditor({ nodeId, data, onChange, onClose }: Props) {
 
       <Separator />
 
-      <div className="px-4 py-3">
+      <div className="px-4 py-3 flex flex-col gap-2">
+        <button
+          onClick={() => onDelete(nodeId)}
+          className="flex items-center justify-center gap-1.5 w-full rounded-md border border-destructive/40 py-1.5 text-xs text-destructive hover:bg-destructive/10 transition-colors"
+        >
+          <Trash2 className="h-3 w-3" />
+          Delete node
+        </button>
         <p className="text-[11px] text-muted-foreground leading-relaxed">
           Free models need a <span className="text-foreground font-medium">Google AI</span> or <span className="text-foreground font-medium">Groq</span> API key — both have generous free tiers.
         </p>
