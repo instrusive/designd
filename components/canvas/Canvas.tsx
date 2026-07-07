@@ -110,7 +110,7 @@ const DEFAULT_EDGES: Edge[] = [
 let idCounter = 10;
 function nextId() { return String(++idCounter); }
 
-const NODE_W = 220;
+const NODE_W = 240;
 const NODE_H = 120;
 const NODE_PAD = 24;
 

@@ -100,7 +100,7 @@ export function AgentNode({ data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "w-[160px] rounded-xl border-2 px-3 py-2.5 shadow-lg transition-all",
+        "w-[240px] rounded-xl border-2 px-3 py-2.5 shadow-lg transition-all",
         config.color,
         selected && "ring-2 ring-white/20 ring-offset-1 ring-offset-transparent"
       )}
