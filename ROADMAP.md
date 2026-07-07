@@ -12,7 +12,6 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 - [x] Left sidebar (node palette) + right panel (editor / output)
 - [x] LocalStorage persistence — canvas auto-saves on every change
 - [x] Topological sort — nodes always run in the correct dependency order
-- [x] Clerk auth setup
 - [x] Neon PostgreSQL + Drizzle ORM (schema: users table)
 
 ### AI
@@ -27,12 +26,27 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 - [x] 3 quantitative research nodes: Survey, Data Analysis, A/B Test
 - [x] Each research node drops pre-loaded with a detailed system prompt
 - [x] Sidebar grouped into sections: Pipeline / Qualitative / Quantitative
-- [x] NodeEditor — click any node to edit its name, model, and system prompt
+- [x] Compact fixed-width nodes (160px) with wrapping label and 2-line description preview
+- [x] New nodes auto-offset on drop to avoid overlapping existing nodes
+- [x] Delete a node via button in the editor panel or keyboard Delete/Backspace
+- [x] Dark mode fixes: native select, edge colors, MiniMap
 
-### Default Pipeline (based on your FigJam)
+### Node Editor
+- [x] Edit name, model, and system prompt per node
+- [x] Materials — attach reference content to any node:
+  - **Text** — paste notes, briefs, or research directly
+  - **Link** — any public URL, fetched and extracted at run time
+  - **Image** — upload and compress locally, sent as vision input
+  - **Figma** — paste a Figma frame URL, exported via Figma API (requires `FIGMA_ACCESS_TOKEN`)
+
+### Default Pipeline (based on your design thinking process)
 - [x] Design Brief → Discover → Define → Design → Test
 - [x] Each agent's prompt reflects your actual design thinking process
-- [x] HEART vs CASTLE framework logic in the Test agent
+- [x] HEART vs CASTLE framework logic built into the Test agent
+
+### Branding
+- [x] Copyright: Lianna Lamorena
+- [x] Portfolio link: madebylianna.com in the toolbar
 
 ---
 
@@ -41,7 +55,7 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 ### Soon
 - [ ] **Named pipelines** — save and reload different pipelines by name, not just one auto-save
 - [ ] **Streaming output** — results appear word-by-word instead of all at once
-- [ ] **Increase output token limit** — current cap is 512 tokens (~380 words), raise for richer research outputs
+- [ ] **Increase output token limit** — current cap is 2048 tokens, raise for richer research outputs
 
 ### Medium term
 - [ ] **Better context passing** — structured handoff between nodes instead of raw text concatenation
@@ -49,8 +63,8 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 - [ ] **Pipeline templates gallery** — starter pipelines for common design tasks (discovery sprint, usability test plan, design brief, etc.)
 
 ### Later
-- [ ] **Save pipelines to database** — move beyond localStorage so pipelines persist across devices and browsers
-- [ ] **User accounts** — tie saved pipelines to the logged-in Clerk user
+- [ ] **Save pipelines to database** — move beyond localStorage so pipelines persist across devices
+- [ ] **User accounts** — tie saved pipelines to a logged-in user
 - [ ] **Share pipelines** — share a pipeline with another designer via link
 - [ ] **More node types** — Define phase methods (personas, HMW, JTBD), Design phase methods (wireframe brief, user flow, prototype spec)
 
@@ -61,11 +75,21 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 1. Open the canvas at `/canvas`
 2. Drag nodes from the left sidebar onto the canvas
 3. Connect nodes by dragging from a right handle to a left handle
-4. Click a node to edit its name, model, and system prompt in the right panel
-5. Click **Run Pipeline** — type your design brief in the dialog — hit Run
-6. Nodes execute in order, each one receiving the outputs of everything connected above it
+4. Click a node to edit its name, model, system prompt, and materials in the right panel
+5. Click **Run Pipeline** — type your design brief — hit Run
+6. Nodes execute in order, each receiving the outputs of everything connected above it
 7. Watch results appear in the right output panel in real time
 8. Click **Reset** in the toolbar to restore the default 5-node pipeline
+
+---
+
+## Environment variables
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `OPENROUTER_API_KEY` | Yes | Runs all AI models via OpenRouter |
+| `FIGMA_ACCESS_TOKEN` | Optional | Fetches Figma frames as images for vision models |
+| `DATABASE_URL` | Yes | Neon PostgreSQL connection string |
 
 ---
 
@@ -73,8 +97,8 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 
 | Model ID | Notes |
 |---|---|
-| `google/gemini-2.0-flash-exp:free` | Current default — fast, good quality |
+| `google/gemini-2.0-flash-exp:free` | Current default — fast, supports vision |
 | `meta-llama/llama-3.3-70b-instruct:free` | Strong for structured outputs |
 | `mistralai/mistral-7b-instruct:free` | Lightweight and fast |
 
-Switch any node's model in the NodeEditor. Full model list at openrouter.ai/models — filter by "Free".
+Full list at openrouter.ai/models — filter by "Free". Vision models (for image/Figma materials) must support multimodal input.
