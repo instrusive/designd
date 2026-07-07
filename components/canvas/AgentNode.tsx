@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export type Material = {
   id: string;
-  type: "text" | "link";
+  type: "text" | "link" | "image" | "figma";
   label: string;
   content: string;
 };

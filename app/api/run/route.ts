@@ -23,14 +23,63 @@ const openrouter = createOpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-async function resolveMaterials(materials: Material[]): Promise<string> {
-  if (materials.length === 0) return "";
+function parseDataUrl(dataUrl: string): { base64: string; mimeType: string } | null {
+  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
+  if (!match) return null;
+  return { mimeType: match[1], base64: match[2] };
+}
 
-  const parts: string[] = [];
-  for (const m of materials) {
+function parseFigmaUrl(url: string): { fileKey: string; nodeId: string } | null {
+  const match = url.match(/figma\.com\/(?:file|design|board)\/([a-zA-Z0-9]+)/);
+  if (!match) return null;
+  try {
+    const nodeId = (new URL(url).searchParams.get("node-id") ?? "0:1").replace("-", ":");
+    return { fileKey: match[1], nodeId };
+  } catch { return null; }
+}
+
+async function fetchFigmaImage(url: string): Promise<{ base64: string; mimeType: string } | null> {
+  const token = process.env.FIGMA_ACCESS_TOKEN;
+  if (!token) return null;
+
+  const parsed = parseFigmaUrl(url);
+  if (!parsed) return null;
+
+  try {
+    const res = await fetch(
+      `https://api.figma.com/v1/images/${parsed.fileKey}?ids=${encodeURIComponent(parsed.nodeId)}&format=png&scale=2`,
+      { headers: { "X-Figma-Token": token }, signal: AbortSignal.timeout(10000) }
+    );
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as { images: Record<string, string> };
+    const imageUrl = Object.values(data.images)[0];
+    if (!imageUrl) return null;
+
+    const imgRes = await fetch(imageUrl, { signal: AbortSignal.timeout(10000) });
+    const buffer = await imgRes.arrayBuffer();
+    return { base64: Buffer.from(buffer).toString("base64"), mimeType: "image/png" };
+  } catch { return null; }
+}
+
+type ImagePart = { type: "image"; image: string; mimeType: string };
+type TextPart  = { type: "text";  text: string };
+
+export async function POST(req: Request) {
+  const body = (await req.json()) as RunNodeRequest;
+
+  const systemPrompt = body.description?.trim()
+    ? body.description
+    : `You are ${body.label}, an AI agent. Process the input and produce a concise, useful output.`;
+
+  // Resolve materials into text parts and image parts
+  const textMaterials: string[] = [];
+  const imageParts: ImagePart[] = [];
+
+  for (const m of body.materials ?? []) {
     if (m.type === "text") {
-      parts.push(`### ${m.label}\n${m.content}`);
-    } else {
+      textMaterials.push(`### ${m.label}\n${m.content}`);
+    } else if (m.type === "link") {
       try {
         const res = await fetch(m.content, {
           headers: { "User-Agent": "Mozilla/5.0" },
@@ -44,33 +93,48 @@ async function resolveMaterials(materials: Material[]): Promise<string> {
           .replace(/\s+/g, " ")
           .trim()
           .slice(0, 4000);
-        parts.push(`### ${m.label}\n${text}`);
+        textMaterials.push(`### ${m.label}\n${text}`);
       } catch {
-        parts.push(`### ${m.label}\n[Link could not be fetched: ${m.content}]`);
+        textMaterials.push(`### ${m.label}\n[Could not fetch: ${m.content}]`);
+      }
+    } else if (m.type === "image") {
+      const parsed = parseDataUrl(m.content);
+      if (parsed) imageParts.push({ type: "image", image: parsed.base64, mimeType: parsed.mimeType });
+    } else if (m.type === "figma") {
+      const img = await fetchFigmaImage(m.content);
+      if (img) {
+        imageParts.push({ type: "image", image: img.base64, mimeType: img.mimeType });
+      } else {
+        textMaterials.push(`### ${m.label}\n[Figma frame could not be fetched — check your FIGMA_ACCESS_TOKEN]`);
       }
     }
   }
 
-  return `## Reference Materials\n\n${parts.join("\n\n---\n\n")}`;
-}
+  const materialsText = textMaterials.length > 0
+    ? `## Reference Materials\n\n${textMaterials.join("\n\n---\n\n")}`
+    : "";
 
-export async function POST(req: Request) {
-  const body = (await req.json()) as RunNodeRequest;
-
-  const systemPrompt = body.description?.trim()
-    ? body.description
-    : `You are ${body.label}, an AI agent. Process the input and produce a concise, useful output.`;
-
-  const materialsContext = await resolveMaterials(body.materials ?? []);
-  const prompt = materialsContext
-    ? `${materialsContext}\n\n---\n\n${body.inputText || "Begin."}`
+  const promptText = materialsText
+    ? `${materialsText}\n\n---\n\n${body.inputText || "Begin."}`
     : body.inputText || "Begin.";
 
   try {
     const { text } = await generateText({
       model: openrouter(body.model),
       system: systemPrompt,
-      prompt,
+      ...(imageParts.length > 0
+        ? {
+            messages: [
+              {
+                role: "user" as const,
+                content: [
+                  { type: "text" as const, text: promptText } satisfies TextPart,
+                  ...imageParts,
+                ],
+              },
+            ],
+          }
+        : { prompt: promptText }),
       maxOutputTokens: 2048,
     });
 
