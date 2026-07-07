@@ -1,13 +1,14 @@
 "use client";
 
-import { X } from "lucide-react";
+import { useState } from "react";
+import { X, Plus, Link, FileText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import type { AgentNodeData } from "./AgentNode";
+import type { AgentNodeData, Material } from "./AgentNode";
 
 const MODELS: { value: string; label: string; free: boolean }[] = [
   // Free models
@@ -32,6 +33,32 @@ type Props = {
 };
 
 export function NodeEditor({ nodeId, data, onChange, onClose }: Props) {
+  const [adding, setAdding] = useState(false);
+  const [newType, setNewType] = useState<"text" | "link">("link");
+  const [newLabel, setNewLabel] = useState("");
+  const [newContent, setNewContent] = useState("");
+
+  const materials = data.materials ?? [];
+
+  function saveMaterial() {
+    if (!newContent.trim()) return;
+    const material: Material = {
+      id: crypto.randomUUID(),
+      type: newType,
+      label: newLabel.trim() || newContent.trim().slice(0, 50),
+      content: newContent.trim(),
+    };
+    onChange(nodeId, { materials: [...materials, material] });
+    setAdding(false);
+    setNewLabel("");
+    setNewContent("");
+    setNewType("link");
+  }
+
+  function removeMaterial(id: string) {
+    onChange(nodeId, { materials: materials.filter((m) => m.id !== id) });
+  }
+
   return (
     <aside className="w-64 shrink-0 border-l border-border bg-card flex flex-col">
       <div className="flex items-center justify-between px-4 py-3">
@@ -87,6 +114,112 @@ export function NodeEditor({ nodeId, data, onChange, onClose }: Props) {
             className="text-sm resize-none min-h-[100px]"
             placeholder="What does this agent do?"
           />
+        </div>
+
+        <Separator />
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs">Materials</Label>
+            {!adding && (
+              <button
+                onClick={() => setAdding(true)}
+                className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                Add
+              </button>
+            )}
+          </div>
+
+          {materials.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              {materials.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-start gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-2"
+                >
+                  {m.type === "link"
+                    ? <Link className="h-3 w-3 mt-0.5 shrink-0 text-muted-foreground" />
+                    : <FileText className="h-3 w-3 mt-0.5 shrink-0 text-muted-foreground" />
+                  }
+                  <span className="text-[11px] text-foreground leading-tight flex-1 truncate" title={m.label}>
+                    {m.label}
+                  </span>
+                  <button
+                    onClick={() => removeMaterial(m.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {adding && (
+            <div className="flex flex-col gap-2 rounded-md border border-border bg-muted/20 p-2.5">
+              <div className="flex gap-1.5">
+                <button
+                  onClick={() => setNewType("link")}
+                  className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] border transition-colors ${newType === "link" ? "border-primary text-foreground bg-primary/10" : "border-border text-muted-foreground"}`}
+                >
+                  <Link className="h-3 w-3" /> Link
+                </button>
+                <button
+                  onClick={() => setNewType("text")}
+                  className={`flex items-center gap-1 rounded px-2 py-1 text-[11px] border transition-colors ${newType === "text" ? "border-primary text-foreground bg-primary/10" : "border-border text-muted-foreground"}`}
+                >
+                  <FileText className="h-3 w-3" /> Text
+                </button>
+              </div>
+
+              <Input
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                className="h-7 text-xs"
+                placeholder="Label (optional)"
+              />
+
+              {newType === "link" ? (
+                <Input
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  className="h-7 text-xs"
+                  placeholder="https://..."
+                />
+              ) : (
+                <Textarea
+                  value={newContent}
+                  onChange={(e) => setNewContent(e.target.value)}
+                  className="text-xs resize-none min-h-[80px]"
+                  placeholder="Paste your text, notes, or brief here…"
+                />
+              )}
+
+              <div className="flex gap-1.5 justify-end">
+                <button
+                  onClick={() => { setAdding(false); setNewLabel(""); setNewContent(""); }}
+                  className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={saveMaterial}
+                  disabled={!newContent.trim()}
+                  className="text-[11px] font-medium bg-primary text-primary-foreground rounded px-2 py-1 disabled:opacity-40 hover:opacity-90 transition-opacity"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+
+          {materials.length === 0 && !adding && (
+            <p className="text-[11px] text-muted-foreground">
+              Attach docs, briefs, or links for this agent to reference.
+            </p>
+          )}
         </div>
       </div>
 

@@ -5,12 +5,20 @@ import { Bot, Cpu, Zap, Users, MessageSquare, Eye, ClipboardList, BarChart2, Fla
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+export type Material = {
+  id: string;
+  type: "text" | "link";
+  label: string;
+  content: string;
+};
+
 export type AgentNodeData = {
   label: string;
   model: string;
   type: "agent" | "subagent" | "trigger" | "output" | "user-interview" | "focus-group" | "observation" | "survey" | "data-analysis" | "ab-test";
   status?: "idle" | "running" | "done" | "error";
   description?: string;
+  materials?: Material[];
 };
 
 const TYPE_CONFIG = {

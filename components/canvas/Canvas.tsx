@@ -258,6 +258,7 @@ export function Canvas() {
             description: data.description ?? "",
             model: data.model,
             inputText,
+            materials: data.materials ?? [],
           } satisfies RunNodeRequest),
         });
 
