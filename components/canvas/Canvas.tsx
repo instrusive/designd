@@ -110,6 +110,33 @@ const DEFAULT_EDGES: Edge[] = [
 let idCounter = 10;
 function nextId() { return String(++idCounter); }
 
+const NODE_W = 220;
+const NODE_H = 120;
+const NODE_PAD = 24;
+
+function findFreePosition(
+  pos: { x: number; y: number },
+  existingNodes: Node[]
+): { x: number; y: number } {
+  let { x, y } = pos;
+  for (let attempt = 0; attempt < 40; attempt++) {
+    const overlaps = existingNodes.some((n) => {
+      const nw = (n.style?.width as number | undefined) ?? (n.measured?.width as number | undefined) ?? NODE_W;
+      const nh = (n.style?.height as number | undefined) ?? (n.measured?.height as number | undefined) ?? NODE_H;
+      return (
+        x < n.position.x + nw + NODE_PAD &&
+        x + NODE_W > n.position.x - NODE_PAD &&
+        y < n.position.y + nh + NODE_PAD &&
+        y + NODE_H > n.position.y - NODE_PAD
+      );
+    });
+    if (!overlaps) return { x, y };
+    x += NODE_W + NODE_PAD;
+    if (attempt > 0 && attempt % 4 === 0) { x = pos.x; y += NODE_H + NODE_PAD; }
+  }
+  return { x, y };
+}
+
 const DEFAULT_PROMPTS: Partial<Record<AgentNodeData["type"], string>> = {
   "user-interview": `You are a UX researcher synthesizing user interview findings. Based on the design brief and any prior context, produce: (1) a recruitment screener — who to interview and why, (2) a discussion guide with 8 open-ended questions grouped by theme, (3) a synthesis of 4–5 themes a researcher would surface from these interviews, (4) representative quotes that illustrate each theme. Write as a practitioner who has done the fieldwork.`,
   "focus-group": `You are a UX researcher planning and synthesizing a focus group. Based on the design brief and context, produce: (1) a participant mix — how many people, what profiles, why this composition, (2) a facilitator guide with a warm-up exercise and 3–4 discussion topics, (3) a synthesis of key tensions or agreements that typically emerge, (4) a list of group dynamics to watch for that could skew results. Write as a facilitator preparing for a real session.`,
@@ -190,7 +217,8 @@ export function Canvas() {
     if (!type || !rfInstance) return;
     const bounds = reactFlowWrapper.current?.getBoundingClientRect();
     if (!bounds) return;
-    const position = rfInstance.screenToFlowPosition({ x: e.clientX - bounds.left, y: e.clientY - bounds.top });
+    const rawPosition = rfInstance.screenToFlowPosition({ x: e.clientX - bounds.left, y: e.clientY - bounds.top });
+    const position = findFreePosition(rawPosition, nodes);
     const label = type.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     setNodes((nds) => [...nds, {
       id: nextId(),
