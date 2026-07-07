@@ -21,6 +21,10 @@ export type RunNodeResponse = {
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY ?? "",
+  headers: {
+    "HTTP-Referer": "https://designd.vercel.app",
+    "X-Title": "designd",
+  },
 });
 
 function parseDataUrl(dataUrl: string): { base64: string; mimeType: string } | null {
@@ -148,7 +152,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ nodeId: body.nodeId, output: text } satisfies RunNodeResponse);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
+    let message = err instanceof Error ? err.message : "Unknown error";
+    // Surface the actual response body from OpenRouter for clearer debugging
+    if (err && typeof err === "object" && "responseBody" in err && typeof err.responseBody === "string") {
+      try {
+        const body = JSON.parse(err.responseBody) as { error?: { message?: string } };
+        if (body.error?.message) message = body.error.message;
+      } catch {}
+    }
     return NextResponse.json(
       { nodeId: body.nodeId, output: "", error: message } satisfies RunNodeResponse,
       { status: 500 }
