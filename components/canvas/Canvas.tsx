@@ -36,13 +36,11 @@ import type { RunNodeRequest, RunNodeResponse } from "@/app/api/run/route";
 
 const NODE_TYPES = { agentNode: AgentNode };
 const STORAGE_KEY = "designd-canvas";
-const STORAGE_VERSION = 3;
+const STORAGE_VERSION = 4;
 
 const VALID_MODELS = new Set([
   "meta-llama/llama-3.3-70b-instruct:free",
-  "google/gemini-2.5-flash-preview:free",
   "deepseek/deepseek-r1:free",
-  "mistralai/mistral-7b-instruct:free",
   "qwen/qwen3-235b-a22b:free",
   "anthropic/claude-sonnet-4-5",
   "anthropic/claude-haiku-4-5",

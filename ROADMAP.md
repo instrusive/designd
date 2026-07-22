@@ -97,8 +97,8 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 
 | Model ID | Notes |
 |---|---|
-| `google/gemini-2.0-flash-exp:free` | Current default — fast, supports vision |
-| `meta-llama/llama-3.3-70b-instruct:free` | Strong for structured outputs |
-| `mistralai/mistral-7b-instruct:free` | Lightweight and fast |
+| `meta-llama/llama-3.3-70b-instruct:free` | Default — strong for structured outputs |
+| `deepseek/deepseek-r1:free` | Strong reasoning model |
+| `qwen/qwen3-235b-a22b:free` | Large, capable model |
 
 Full list at openrouter.ai/models — filter by "Free". Vision models (for image/Figma materials) must support multimodal input.

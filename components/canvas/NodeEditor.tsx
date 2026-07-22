@@ -13,9 +13,7 @@ import type { AgentNodeData, Material } from "./AgentNode";
 const MODELS: { value: string; label: string; free: boolean }[] = [
   // Free models (via OpenRouter :free tier)
   { value: "meta-llama/llama-3.3-70b-instruct:free", label: "Llama 3.3 70B",          free: true },
-  { value: "google/gemini-2.5-flash-preview:free",   label: "Gemini 2.5 Flash",        free: true },
   { value: "deepseek/deepseek-r1:free",              label: "DeepSeek R1",             free: true },
-  { value: "mistralai/mistral-7b-instruct:free",     label: "Mistral 7B",              free: true },
   { value: "qwen/qwen3-235b-a22b:free",              label: "Qwen3 235B",              free: true },
   // Paid models
   { value: "anthropic/claude-sonnet-4-5",            label: "Claude Sonnet 4.5",       free: false },
