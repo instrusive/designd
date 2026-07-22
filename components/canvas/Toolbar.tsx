@@ -10,12 +10,13 @@ type Props = {
   onRun: () => void;
   onReset: () => void;
   onShowOutput: () => void;
+  outputVisible: boolean;
   nodeCount: number;
   running: boolean;
   hasResults: boolean;
 };
 
-export function Toolbar({ onClear, onRun, onReset, onShowOutput, nodeCount, running, hasResults }: Props) {
+export function Toolbar({ onClear, onRun, onReset, onShowOutput, outputVisible, nodeCount, running, hasResults }: Props) {
   return (
     <header className="flex h-12 items-center gap-3 border-b border-border bg-card px-4 shrink-0">
       <span className="text-sm font-semibold tracking-tight">designd</span>
@@ -46,9 +47,9 @@ export function Toolbar({ onClear, onRun, onReset, onShowOutput, nodeCount, runn
           Clear
         </Button>
         {hasResults && !running && (
-          <Button size="sm" variant="outline" onClick={onShowOutput} className="h-7 gap-1.5 text-xs">
+          <Button size="sm" variant={outputVisible ? "secondary" : "outline"} onClick={onShowOutput} className="h-7 gap-1.5 text-xs">
             <PanelRight className="h-3 w-3" />
-            View Output
+            {outputVisible ? "Hide Output" : "View Output"}
           </Button>
         )}
         <Button size="sm" onClick={onRun} disabled={running} className="h-7 gap-1.5 text-xs">

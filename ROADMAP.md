@@ -52,9 +52,6 @@ Visual AI agent canvas built around Lianna Lamorena's design thinking process.
 
 ## Up next
 
-### Bugs to fix
-- [ ] **View Output button not appearing** — button was added to toolbar but isn't showing after a run; needs debugging
-
 ### Soon
 - [ ] **Named pipelines** — save and reload different pipelines by name, not just one auto-save
 - [ ] **Streaming output** — results appear word-by-word instead of all at once
