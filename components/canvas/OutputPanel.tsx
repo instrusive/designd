@@ -1,6 +1,7 @@
 "use client";
 
 import { X, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,8 +21,16 @@ type Props = {
 };
 
 export function OutputPanel({ results, onClose }: Props) {
+  const { width, onMouseDown } = useResizablePanel({ defaultWidth: 320, min: 280, max: 800, side: "right" });
+
   return (
-    <aside className="w-80 shrink-0 border-l border-border bg-card flex flex-col">
+    <aside className="shrink-0 border-l border-border bg-card flex flex-col relative" style={{ width }}>
+      {/* drag handle */}
+      <div
+        onMouseDown={onMouseDown}
+        className="absolute left-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/30 transition-colors z-10"
+      />
+
       <div className="flex items-center justify-between px-4 py-3">
         <p className="text-sm font-semibold">Pipeline Output</p>
         <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onClose}>
@@ -50,7 +59,7 @@ export function OutputPanel({ results, onClose }: Props) {
 
               <div
                 className={cn(
-                  "rounded-lg border px-3 py-2 text-xs leading-relaxed",
+                  "rounded-lg border px-3 py-2 text-xs leading-relaxed whitespace-pre-wrap break-words",
                   r.status === "running" && "border-amber-500/20 bg-amber-500/5 text-muted-foreground italic",
                   r.status === "done" && "border-border bg-muted/40 text-foreground",
                   r.status === "error" && "border-red-500/20 bg-red-500/5 text-red-400"

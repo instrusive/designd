@@ -132,3 +132,21 @@
     color-scheme: dark;
   }
 }
+
+/* ReactFlow controls — override its internal CSS variables so they follow our theme */
+.react-flow {
+  --xy-controls-button-background-color-default: var(--card);
+  --xy-controls-button-background-color-hover-default: var(--muted);
+  --xy-controls-button-border-color-default: var(--border);
+  --xy-controls-button-color-default: var(--foreground);
+  --xy-minimap-background-color-default: var(--card);
+  --xy-minimap-mask-background-color-default: var(--background);
+}
+
+.react-flow__controls-button {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+.react-flow__controls-button svg {
+  fill: var(--foreground) !important;
+}

@@ -1,4 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
+import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
 import type { Material } from "@/components/canvas/AgentNode";
@@ -10,6 +12,8 @@ export type RunNodeRequest = {
   model: string;
   inputText: string;
   materials?: Material[];
+  workflowMd?: string;
+  clientKeys?: { google?: string; anthropic?: string };
 };
 
 export type RunNodeResponse = {
@@ -26,6 +30,26 @@ const openrouter = createOpenAI({
     "X-Title": "designd",
   },
 });
+
+const anthropic = createAnthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+});
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY ?? "",
+});
+
+function resolveModel(modelId: string, clientKeys?: { google?: string; anthropic?: string }) {
+  if (modelId.startsWith("anthropic/")) {
+    const key = clientKeys?.anthropic || process.env.ANTHROPIC_API_KEY || "";
+    return createAnthropic({ apiKey: key })(modelId.replace("anthropic/", ""));
+  }
+  if (modelId.startsWith("google/")) {
+    const key = clientKeys?.google || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "";
+    return createGoogleGenerativeAI({ apiKey: key })(modelId.replace("google/", ""));
+  }
+  return openrouter(modelId);
+}
 
 function parseDataUrl(dataUrl: string): { base64: string; mimeType: string } | null {
   const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
@@ -70,19 +94,37 @@ type ImagePart = { type: "image"; image: string; mimeType: string };
 type TextPart  = { type: "text";  text: string };
 
 export async function POST(req: Request) {
-  if (!process.env.OPENROUTER_API_KEY) {
-    const body = (await req.json()) as RunNodeRequest;
+  const body = (await req.json()) as RunNodeRequest;
+  const isAnthropic = body.model?.startsWith("anthropic/");
+  const isGoogle = body.model?.startsWith("google/");
+  const { clientKeys } = body;
+
+  if (isAnthropic && !clientKeys?.anthropic && !process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      { nodeId: body.nodeId, output: "", error: "No Anthropic API key found. Add one via the API Keys button in the toolbar." } satisfies RunNodeResponse,
+      { status: 500 }
+    );
+  }
+  if (isGoogle && !clientKeys?.google && !process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    return NextResponse.json(
+      { nodeId: body.nodeId, output: "", error: "No Google API key found. Add one via the API Keys button in the toolbar." } satisfies RunNodeResponse,
+      { status: 500 }
+    );
+  }
+  if (!isAnthropic && !isGoogle && !process.env.OPENROUTER_API_KEY) {
     return NextResponse.json(
       { nodeId: body.nodeId, output: "", error: "OPENROUTER_API_KEY is not set. Add it to your .env.local file (local) or Vercel Environment Variables (deployed)." } satisfies RunNodeResponse,
       { status: 500 }
     );
   }
 
-  const body = (await req.json()) as RunNodeRequest;
-
-  const systemPrompt = body.description?.trim()
+  const basePrompt = body.description?.trim()
     ? body.description
     : `You are ${body.label}, an AI agent. Process the input and produce a concise, useful output.`;
+
+  const systemPrompt = body.workflowMd?.trim()
+    ? `${basePrompt}\n\n---\n\n## Personal Workflow Guide\n\n${body.workflowMd.trim()}`
+    : basePrompt;
 
   // Resolve materials into text parts and image parts
   const textMaterials: string[] = [];
@@ -132,7 +174,7 @@ export async function POST(req: Request) {
 
   try {
     const { text } = await generateText({
-      model: openrouter(body.model),
+      model: resolveModel(body.model, clientKeys),
       system: systemPrompt,
       ...(imageParts.length > 0
         ? {

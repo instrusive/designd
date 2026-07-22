@@ -3,6 +3,7 @@
 import { Bot, Cpu, Zap, ArrowRight, Users, MessageSquare, Eye, ClipboardList, BarChart2, FlaskConical } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { useResizablePanel } from "@/hooks/useResizablePanel";
 
 const PIPELINE_NODES = [
   { type: "trigger",  label: "Trigger",  description: "Starts the pipeline",  icon: Zap,      color: "border-amber-500/30 bg-amber-500/5 text-amber-400" },
@@ -55,13 +56,21 @@ function NodeGroup({ label, nodes, onDragStart }: {
 }
 
 export function Sidebar() {
+  const { width, onMouseDown } = useResizablePanel({ defaultWidth: 224, min: 180, max: 480, side: "left" });
+
   function onDragStart(e: React.DragEvent, type: string) {
     e.dataTransfer.setData("application/reactflow", type);
     e.dataTransfer.effectAllowed = "move";
   }
 
   return (
-    <aside className="w-56 shrink-0 border-r border-border bg-card flex flex-col">
+    <aside className="shrink-0 border-r border-border bg-card flex flex-col relative" style={{ width }}>
+      {/* drag handle */}
+      <div
+        onMouseDown={onMouseDown}
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize hover:bg-primary/30 transition-colors z-10"
+      />
+
       <div className="px-4 py-4">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Node Types

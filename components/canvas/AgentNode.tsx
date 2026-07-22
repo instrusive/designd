@@ -19,6 +19,9 @@ export type AgentNodeData = {
   status?: "idle" | "running" | "done" | "error";
   description?: string;
   materials?: Material[];
+  method?: string;
+  workflowMd?: string;
+  workflowMdName?: string;
 };
 
 const TYPE_CONFIG = {
